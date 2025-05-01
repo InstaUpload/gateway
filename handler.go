@@ -21,6 +21,9 @@ func (h *Handler) mount() http.Handler {
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Route("/users", func(r chi.Router) {
 		r.Post("/create", h.CreateUser)
+		r.Post("/login", h.LoginUser)
+		r.Use(h.GetCurrentUser)
+		r.Get("/send-verify", h.SendVerifyUser)
 	})
 
 	return r

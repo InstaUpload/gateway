@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"time"
@@ -57,4 +58,8 @@ func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		message: "User logged in successfully",
 	}
 	SendJsonResponse(&w, http.StatusOK, resp)
+}
+
+func (h *Handler) SendVerifyUser(w http.ResponseWriter, r *http.Request) {
+	errors.New("not implemented")
 }

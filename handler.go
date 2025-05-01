@@ -13,13 +13,15 @@ type Handler struct {
 	userClient pb.UserServiceClient
 }
 
-func (h *handler) mount() http.Handler {
+func (h *Handler) mount() http.Handler {
 	r := chi.NewRouter()
 	// Middleware
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
-	r.Post("/users/create", handler.handleCreateUser)
+	r.Route("/users", func(r chi.Router) {
+		r.Post("/create", h.CreateUser)
+	})
 
 	return r
 }

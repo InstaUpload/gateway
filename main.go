@@ -7,6 +7,7 @@ import (
 	"time"
 
 	pb "github.com/InstaUpload/common/api"
+	"github.com/InstaUpload/gateway/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -23,7 +24,7 @@ func getUserService(ctx context.Context, addr string) (pb.UserServiceClient, *gr
 
 func run(mux http.Handler) error {
 	srv := &http.Server{
-		Addr:         "5000",
+		Addr:         utils.GetEnvString("HTTP_SERVER_PORT", ":5000"),
 		Handler:      mux,
 		WriteTimeout: time.Second * 30,
 		ReadTimeout:  time.Second * 40,
@@ -36,6 +37,7 @@ func run(mux http.Handler) error {
 
 func main() {
 	ctx := context.Background()
+	// TODO: Get user service address from env
 	userService, conn, err := getUserService(ctx, "localhost:5003")
 	if err != nil {
 		log.Fatal("can not get user service")
@@ -44,6 +46,6 @@ func main() {
 	handler := &Handler{userClient: userService}
 	mux := handler.mount()
 	if err := run(mux); err != nil {
-		log.Fatal("Failed to start server")
+		log.Fatalf("Failed to start server: %v", err)
 	}
 }

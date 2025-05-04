@@ -9,6 +9,7 @@ import (
 	"time"
 
 	pb "github.com/InstaUpload/common/api"
+	common "github.com/InstaUpload/common/types"
 )
 
 func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -21,19 +22,19 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("error decoding request: ", err)
 		return
 	}
-	resp, err := h.userClient.CreateUser(ctx, &user)
+	grpcResp, err := h.userClient.CreateUser(ctx, &user)
 	if err != nil {
 		http.Error(w, "Failed to create user", http.StatusInternalServerError)
 		log.Println("error creating user: ", err)
 		return
 	}
-	log.Printf("Response: %v", resp)
-	resp = struct {
+	log.Printf("Response: %v", grpcResp)
+	resp := struct {
 		message string `json:"message"`
 	}{
 		message: "User created successfully",
 	}
-	SendJsonResponse(&w, http.StatusCreated, resp)
+	SendJsonResponse(w, http.StatusCreated, resp)
 }
 
 func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
@@ -44,22 +45,72 @@ func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		Email:    "gpt.sahaj28@gmail.com",
 		Password: "password123",
 	}
-	resp, err := h.userClient.LoginUser(ctx, &user)
+	grpcResp, err := h.userClient.LoginUser(ctx, &user)
 	if err != nil {
 		http.Error(w, "Failed to login user", http.StatusInternalServerError)
 		log.Println("error logging in user: ", err)
 		return
 	}
-	r.Header().Set("Authorization", resp.Token)
-	log.Printf("Response: %v", resp)
-	resp = struct {
+	r.Header.Set("Authorization", grpcResp.Token)
+	log.Printf("Response: %v", grpcResp)
+	resp := struct {
 		message string `json:"message"`
 	}{
 		message: "User logged in successfully",
 	}
-	SendJsonResponse(&w, http.StatusOK, resp)
+	SendJsonResponse(w, http.StatusOK, resp)
+}
+
+func (h *Handler) VerifyUser(w http.ResponseWriter, r *http.Request) {
+	// TODO: Get token from query string.
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		http.Error(w, "Token is needed.", http.StatusBadRequest)
+		log.Println("error logging in user: ")
+		return
+	}
+	req := pb.VerifyUserRequest{
+		Token: token,
+	}
+	grpcResp, err := h.userClient.VerifyUser(r.Context(), &req)
+	if err != nil {
+		if errors.Is(err, common.ErrIncorrectDataReceived) {
+			http.Error(w, "Token is expired", http.StatusUnauthorized)
+			return
+		}
+		if errors.Is(err, common.ErrDataNotFound) {
+			http.Error(w, "User not found or invalid token", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Failed to send verification to user", http.StatusInternalServerError)
+		log.Println("error sending verification token to user: ", err)
+		return
+	}
+	log.Printf("Response: %v", grpcResp)
+	resp := struct {
+		message string `json:"message"`
+	}{
+		message: "User verified",
+	}
+	SendJsonResponse(w, http.StatusOK, resp)
 }
 
 func (h *Handler) SendVerifyUser(w http.ResponseWriter, r *http.Request) {
-	errors.New("not implemented")
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+
+	req := pb.SendVerificationUserRequest{}
+	grpcResp, err := h.userClient.SendVerificationUser(ctx, &req)
+	if err != nil {
+		http.Error(w, "Failed to send verification to user", http.StatusInternalServerError)
+		log.Println("error sending verification token to user: ", err)
+		return
+	}
+	log.Printf("Response: %v", grpcResp)
+	resp := struct {
+		message string `json:"message"`
+	}{
+		message: "Verification send.",
+	}
+	SendJsonResponse(w, http.StatusOK, resp)
 }

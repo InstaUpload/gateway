@@ -22,8 +22,12 @@ func (h *Handler) mount() http.Handler {
 	r.Route("/users", func(r chi.Router) {
 		r.Post("/create", h.CreateUser)
 		r.Post("/login", h.LoginUser)
-		r.Use(h.GetCurrentUser)
-		r.Get("/send-verify", h.SendVerifyUser)
+		r.Get("/verify", h.VerifyUser)
+		r.Group(func(r chi.Router) {
+			r.Use(h.GetCurrentUser)
+			r.Get("/send-verify", h.SendVerifyUser)
+
+		})
 	})
 
 	return r

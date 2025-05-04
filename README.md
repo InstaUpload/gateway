@@ -11,8 +11,8 @@ This repo/module is the http server for frontend and gRPC client for all the mic
     - [ ] Need to add all the functions supported by the user service.
         - [x] Create user function.
         - [x] login user function.
-        - [ ] authenticate user function.
-        - [ ] Send verification user function.
-        - [ ] Verify user function.
+        - [x] authenticate user function.
+        - [x] Send verification user function.
+        - [x] Verify user function.
         - [ ] Send editor request functions.
 - Add a .env to list all URL of microservice.

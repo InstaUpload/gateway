@@ -30,9 +30,9 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Response: %v", grpcResp)
 	resp := struct {
-		message string `json:"message"`
+		Message string `json:"message"`
 	}{
-		message: "User created successfully",
+		Message: "User created successfully",
 	}
 	SendJsonResponse(w, http.StatusCreated, resp)
 }
@@ -51,18 +51,13 @@ func (h *Handler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		log.Println("error logging in user: ", err)
 		return
 	}
-	r.Header.Set("Authorization", grpcResp.Token)
+	r.Header.Set("Authorization", "Bearer "+grpcResp.Token)
 	log.Printf("Response: %v", grpcResp)
-	resp := struct {
-		message string `json:"message"`
-	}{
-		message: "User logged in successfully",
-	}
-	SendJsonResponse(w, http.StatusOK, resp)
+	SendJsonResponse(w, http.StatusOK, grpcResp)
 }
 
 func (h *Handler) VerifyUser(w http.ResponseWriter, r *http.Request) {
-	// TODO: Get token from query string.
+	// Get token from query string.
 	token := r.URL.Query().Get("token")
 	if token == "" {
 		http.Error(w, "Token is needed.", http.StatusBadRequest)
@@ -88,9 +83,9 @@ func (h *Handler) VerifyUser(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Response: %v", grpcResp)
 	resp := struct {
-		message string `json:"message"`
+		Message string `json:"message"`
 	}{
-		message: "User verified",
+		Message: "User verified",
 	}
 	SendJsonResponse(w, http.StatusOK, resp)
 }
@@ -99,7 +94,10 @@ func (h *Handler) SendVerifyUser(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	req := pb.SendVerificationUserRequest{}
+	// Get Current user from ctx, and pass it in SendVerificationUserRequest.
+	req := pb.SendVerificationUserRequest{
+		CurrentUser: ctx.Value(common.CurrentUserKey).(*pb.AuthUserResponse),
+	}
 	grpcResp, err := h.userClient.SendVerificationUser(ctx, &req)
 	if err != nil {
 		http.Error(w, "Failed to send verification to user", http.StatusInternalServerError)
@@ -108,9 +106,9 @@ func (h *Handler) SendVerifyUser(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Response: %v", grpcResp)
 	resp := struct {
-		message string `json:"message"`
+		Message string `json:"message"`
 	}{
-		message: "Verification send.",
+		Message: "Verification send.",
 	}
 	SendJsonResponse(w, http.StatusOK, resp)
 }

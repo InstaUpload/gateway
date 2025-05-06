@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 
 	pb "github.com/InstaUpload/common/api"
 	common "github.com/InstaUpload/common/types"
@@ -13,11 +14,17 @@ import (
 func (h *Handler) GetCurrentUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Extract the token from the request header
-		token := r.Header.Get("Authorization")
-		if token == "" {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		token := parts[1]
 		var req = pb.AuthUserRequest{}
 		req.Token = token
 		resp, err := h.userClient.AuthUser(r.Context(), &req)

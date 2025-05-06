@@ -14,5 +14,5 @@ This repo/module is the http server for frontend and gRPC client for all the mic
         - [x] authenticate user function.
         - [x] Send verification user function.
         - [x] Verify user function.
-        - [ ] Send editor request functions.
+        - [ ] Send add editor request functions.
 - Add a .env to list all URL of microservice.

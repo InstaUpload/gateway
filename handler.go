@@ -25,8 +25,9 @@ func (h *Handler) mount() http.Handler {
 		r.Get("/verify", h.VerifyUser)
 		r.Group(func(r chi.Router) {
 			r.Use(h.GetCurrentUser)
+			r.Put("/update-role", h.UpdateUserRole)
 			r.Get("/send-verify", h.SendVerifyUser)
-
+			r.Post("/add-editor", h.SendVerifyUser)
 		})
 	})
 

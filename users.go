@@ -112,3 +112,31 @@ func (h *Handler) SendVerifyUser(w http.ResponseWriter, r *http.Request) {
 	}
 	SendJsonResponse(w, http.StatusOK, resp)
 }
+
+func (h *Handler) UpdateUserRole(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	defer cancel()
+	// get user id and role name from request body.
+	decoder := json.NewDecoder(r.Body)
+	var req pb.UpdateUserRoleRequest
+	if err := decoder.Decode(&req); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		log.Println("error decoding request: ", err)
+		return
+	}
+	// Get Current user from ctx, and pass it in UpdateUserRoleRequest.
+	req.CurrentUser = ctx.Value(common.CurrentUserKey).(*pb.AuthUserResponse)
+	grpcResp, err := h.userClient.UpdateUserRole(ctx, &req)
+	if err != nil {
+		http.Error(w, "Failed to update user role", http.StatusInternalServerError)
+		log.Println("error updating user role: ", err)
+		return
+	}
+	log.Printf("Response: %v", grpcResp)
+	resp := struct {
+		Message string `json:"message"`
+	}{
+		Message: "User role updated.",
+	}
+	SendJsonResponse(w, http.StatusOK, resp)
+}

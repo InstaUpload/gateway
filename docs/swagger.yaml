@@ -1,0 +1,332 @@
+basePath: /v1
+definitions:
+  main.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  main.LoginUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  main.MessageResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  main.ResetUserPasswordRequest:
+    properties:
+      email:
+        type: string
+    type: object
+  main.UpdateUserPasswordRequest:
+    properties:
+      password:
+        type: string
+    type: object
+  main.UpdateUserRoleRequest:
+    properties:
+      role_name:
+        type: string
+      user_id:
+        type: string
+    type: object
+host: localhost:5000
+info:
+  contact:
+    email: gpt.sahaj28@gmail.com
+    name: Sahaj
+  description: This is swagger api page for InstaUpload gateway service.
+  title: InstaUpload
+  version: "0.1"
+paths:
+  /v1/users/add-editor:
+    post:
+      consumes:
+      - application/json
+      description: Add a user as an editor
+      parameters:
+      - description: Token for adding editor user
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Add Editor User
+      tags:
+      - Users
+  /v1/users/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user
+      parameters:
+      - description: User details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/main.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+      summary: Create User
+      tags:
+      - Users
+  /v1/users/login:
+    post:
+      consumes:
+      - application/json
+      description: Login to an existing user
+      parameters:
+      - description: User login details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/main.LoginUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+      summary: Login User
+      tags:
+      - Users
+  /v1/users/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Reset the password of an existing user
+      parameters:
+      - description: User email to reset password
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/main.ResetUserPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+      summary: Reset User Password
+      tags:
+      - Users
+  /v1/users/send-editor-invite/{u}:
+    put:
+      consumes:
+      - application/json
+      description: Send an invite to a user to become an editor
+      parameters:
+      - description: User ID to send editor invite
+        in: path
+        name: u
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Send Editor Invite
+      tags:
+      - Users
+  /v1/users/send-verify:
+    get:
+      consumes:
+      - application/json
+      description: Send Verify token to a existing user
+      parameters:
+      - description: Token send to user's mail for verification
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Send Verify User
+      tags:
+      - Users
+  /v1/users/update-password:
+    post:
+      consumes:
+      - application/json
+      description: Update the password of an existing user
+      parameters:
+      - description: Token for updating user password
+        in: query
+        name: token
+        required: true
+        type: string
+      - description: New password for the user
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/main.UpdateUserPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+      summary: Update User Password
+      tags:
+      - Users
+  /v1/users/update-role:
+    put:
+      consumes:
+      - application/json
+      description: Update the role of an existing user
+      parameters:
+      - description: User ID and role name
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/main.UpdateUserRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update User Role
+      tags:
+      - Users
+  /v1/users/verify:
+    get:
+      description: Verify a existing user
+      parameters:
+      - description: Token send to user's mail for verification
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.MessageResponse'
+      summary: Verify User
+      tags:
+      - Users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
